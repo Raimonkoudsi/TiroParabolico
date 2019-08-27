@@ -14,6 +14,8 @@ public class Objeto : MonoBehaviour {
 	private void Start()
 	{
 		rb=GetComponent<Rigidbody2D>();
+
+		rb.AddForce(new Vector3(20,10,0)*10);
 	}
 
 
