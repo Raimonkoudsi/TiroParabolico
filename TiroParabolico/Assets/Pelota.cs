@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Objeto : MonoBehaviour {
+public class Pelota : MonoBehaviour {
 
 	public float fuerza;
 	public Vector3 direccion;
 
 	public bool EnZonaViento=false;
-	Rigidbody2D rb;
+	Rigidbody rb;
 
 
 	private void Start()
 	{
-		rb=GetComponent<Rigidbody2D>();
+		rb=GetComponent<Rigidbody>();
 
 		rb.AddForce(new Vector3(20,10,0)*10);
 	}
@@ -28,7 +28,7 @@ public class Objeto : MonoBehaviour {
 	}
 
 
-	void OnTriggerEnter2D(Collider2D colision)
+	void OnTriggerEnter(Collider colision)
 	{
 		if(colision.gameObject.tag=="Viento")
 		{
@@ -36,12 +36,11 @@ public class Objeto : MonoBehaviour {
 		}
 	}
 
-	void OnTriggerExit2D(Collider2D colision)
+	void OnTriggerExit(Collider colision)
 	{
 		if(colision.gameObject.tag=="Viento")
 		{
 			EnZonaViento=false;
 		}
 	}
-
 }
