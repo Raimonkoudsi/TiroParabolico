@@ -15,7 +15,7 @@ public class Pelota : MonoBehaviour {
 	{
 		rb=GetComponent<Rigidbody>();
 
-		rb.AddForce(new Vector3(20,10,0)*10);
+		rb.AddForce(new Vector3(60,40,0)*10);
 	}
 
 
