@@ -15,7 +15,6 @@ public class Pelota : MonoBehaviour {
 	{
 		rb=GetComponent<Rigidbody>();
 
-		rb.AddForce(new Vector3(60,40,0)*10);
 	}
 
 
@@ -25,6 +24,17 @@ public class Pelota : MonoBehaviour {
 		{
 			rb.AddForce(direccion*fuerza);
 		}
+	}
+
+
+	void Update()
+	{
+		if(Input.GetKeyDown(KeyCode.Space))
+        {
+			this.rb.isKinematic=false;
+
+			rb.AddForce(new Vector3(60,40,0)*10);
+        }
 	}
 
 
