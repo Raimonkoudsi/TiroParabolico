@@ -12,6 +12,8 @@ public class Projectile : MonoBehaviour {
 	public LineRenderer lineVisual;
 	public int lineSegment = 10;
 
+    Ball ball;
+
 
 	private Camera cam;
 
@@ -21,14 +23,23 @@ public class Projectile : MonoBehaviour {
 	{
 		cam = Camera.main;	
 		lineVisual.positionCount = lineSegment;
-	}
-	
-	// Update is called once per frame
-	void Update () 
+        ball = bulletPrefabs.gameObject.GetComponent<Ball>();
+        desaceleration = (ball.fuerza * ball.direccion.x) / bulletPrefabs.mass;
+        desacelerationz = (ball.fuerza * ball.direccion.z) / bulletPrefabs.mass;
+    }
+
+    float desaceleration = 0;
+    float desacelerationz = 0;
+
+    // Update is called once per frame
+    void Update () 
 	{
 		LaunchProjectile();
 	}
 
+    void FixedUpdate() {
+
+    }
 
 	void LaunchProjectile()
 	{
@@ -38,10 +49,20 @@ public class Projectile : MonoBehaviour {
 
 		if (Physics.Raycast(camRay, out hit, 100f, layer))
 		{
-			cursor.SetActive(true);
-			cursor.transform.position = hit.point + Vector3.up * 0.1f;
+
 
 			Vector3 Vo = CalculateVelocity(hit.point, shootPoint.position, 1f);
+
+            float vertdestime = Vo.y / Physics.gravity.y;
+            float vertdesdist = (-0.5f * Mathf.Abs(Physics.gravity.y) * Mathf.Pow(vertdestime, 2)) + (Vo.y * vertdestime) + shootPoint.position.y;
+            float diffdist = Mathf.Abs(hit.point.y - vertdesdist);
+            float vertacctime = Mathf.Sqrt((2 * diffdist) / -Physics.gravity.y);
+            float finaltime = vertdestime + vertacctime;
+
+            Vector3 finalpos = CalculatePosInTime(Vo, finaltime);
+
+            cursor.SetActive(true);
+			cursor.transform.position = finalpos;
 
 			Visualize(Vo);
 
@@ -104,15 +125,15 @@ public class Projectile : MonoBehaviour {
 
 	Vector3 CalculatePosInTime(Vector3 vo, float time)
 	{
-		Vector3 Vxz = vo;
-		Vxz.y = 0f;
 
-		Vector3 result = shootPoint.position + vo * time;
-		float sY = (-0.5f * Mathf.Abs(Physics.gravity.y) * Mathf.Pow(time, 2) ) + (vo.y * time) + shootPoint.position.y;
 		
-		result.y = sY;
+		float sY = (-0.5f * Mathf.Abs(Physics.gravity.y) * Mathf.Pow(time, 2) ) + (vo.y * time) + shootPoint.position.y;
+        float sX = (0.5f * Mathf.Abs(desaceleration) * Mathf.Pow(time, 2)) + (vo.x * time) + shootPoint.position.x;
+        float sZ = (0.5f * Mathf.Abs(desacelerationz) * Mathf.Pow(time, 2)) + (vo.z * time) + shootPoint.position.z;
 
-		return result;
+        Vector3 result = new Vector3(sX, sY, sZ);
+
+        return result;
 	}	
 
 }
