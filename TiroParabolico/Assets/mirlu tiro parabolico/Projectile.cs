@@ -1,18 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Projectile : MonoBehaviour {
 
 	
 	public Rigidbody bulletPrefabs;
-	public GameObject cursor;
+	public GameObject plane;
 	public Transform shootPoint;
 	public LayerMask layer;
 	public LineRenderer lineVisual;
 	public int lineSegment = 10;
 
     Ball ball;
+
+    public Text VoX, VoY, VoZ, VientoX, VientoZ;
 
 
 	private Camera cam;
@@ -24,8 +27,6 @@ public class Projectile : MonoBehaviour {
 		cam = Camera.main;	
 		lineVisual.positionCount = lineSegment;
         ball = bulletPrefabs.gameObject.GetComponent<Ball>();
-        desaceleration = (ball.fuerza * ball.direccion.x) / bulletPrefabs.mass;
-        desacelerationz = (ball.fuerza * ball.direccion.z) / bulletPrefabs.mass;
     }
 
     float desaceleration = 0;
@@ -34,55 +35,110 @@ public class Projectile : MonoBehaviour {
     // Update is called once per frame
     void Update () 
 	{
-		LaunchProjectile();
+        //LaunchProjectile();
+        if (Input.GetKeyDown(KeyCode.Return)) {
+            ClickCargar();
+        }
 	}
 
     void FixedUpdate() {
 
     }
 
-	void LaunchProjectile()
-	{
-		Ray camRay = cam.ScreenPointToRay(Input.mousePosition);
+    Vector3 Vo;
+    Vector3 Viento;
 
-		RaycastHit hit;
-
-		if (Physics.Raycast(camRay, out hit, 100f, layer))
-		{
-
-
-			Vector3 Vo = CalculateVelocity(hit.point, shootPoint.position, 1f);
-
-            float vertdestime = Vo.y / Physics.gravity.y;
-            float vertdesdist = (-0.5f * Mathf.Abs(Physics.gravity.y) * Mathf.Pow(vertdestime, 2)) + (Vo.y * vertdestime) + shootPoint.position.y;
-            float diffdist = Mathf.Abs(hit.point.y - vertdesdist);
-            float vertacctime = Mathf.Sqrt((2 * diffdist) / -Physics.gravity.y);
-            float finaltime = vertdestime + vertacctime;
-
-            Vector3 finalpos = CalculatePosInTime(Vo, finaltime);
-
-            cursor.SetActive(true);
-			cursor.transform.position = finalpos;
-
-			Visualize(Vo);
+    public void ClickCargar()
+    {
+        float vientox;
+        if (VientoX.text == "") {
+            vientox = 0;
+        }
+        else {
+            vientox = float.Parse(VientoX.text);
+        }
+        float vientoz;
+        if (VientoZ.text == "")
+        {
+            vientoz = 0;
+        }
+        else {
+            vientoz = float.Parse(VientoZ.text);
+        }
 
 
-			transform.rotation = Quaternion.LookRotation(Vo); //this is for the canon lo face the cursor
+        Viento = new Vector3(vientox, 0, vientoz);
 
-			if (Input.GetMouseButtonDown(0)) //the left click is pressed will stop shooting
-			{
-				Rigidbody obj = Instantiate(bulletPrefabs, shootPoint.position, Quaternion.identity);
-				obj.velocity = Vo;
-				
-			}
+        desaceleration = (Viento.x) / bulletPrefabs.mass;
+        desacelerationz = (Viento.z) / bulletPrefabs.mass;
+
+        float vox;
+        if (VoX.text == "")
+        {
+            vox = 0;
+        }
+        else {
+            vox = float.Parse(VoX.text);
+        }
+        float voy;
+        if (VoY.text == "")
+        {
+            voy = 0;
+        }
+        else
+        {
+            voy = float.Parse(VoY.text);
+        }
+        float voz;
+        if (VoZ.text == "")
+        {
+            voz = 0;
+        }
+        else
+        {
+            voz = float.Parse(VoZ.text);
+        }
+
+        Vo = new Vector3(vox, voy, voz);
+        Visualize(Vo);
+        transform.rotation = Quaternion.LookRotation(Vo);
+    }
+
+    public void ClickDisparar() {
+        Rigidbody obj = Instantiate(bulletPrefabs, shootPoint.position, Quaternion.identity);
+        obj.velocity = Vo;
+        obj.gameObject.GetComponent<Ball>().direccion = new Vector3(Viento.x, 0, Viento.z);
+        Destroy(obj.gameObject, 10);
+    }
+
+    void LaunchProjectile()
+    {
 
 
-		} else
-		{
-			cursor.SetActive(false);
-		}
+        Vector3 Vo = new Vector3(float.Parse(VoX.text), float.Parse(VoY.text), float.Parse(VoZ.text));
 
-	}
+        //float vertdestime = Vo.y / Physics.gravity.y;
+        //float vertdesdist = (-0.5f * Mathf.Abs(Physics.gravity.y) * Mathf.Pow(vertdestime, 2)) + (Vo.y * vertdestime) + shootPoint.position.y;
+        //float diffdist = Mathf.Abs(plane.transform.position.y - vertdesdist);
+        //float vertacctime = Mathf.Sqrt((2 * diffdist) / -Physics.gravity.y);
+        //float finaltime = vertdestime + vertacctime;
+
+        //Vector3 finalpos = CalculatePosInTime(Vo, finaltime);
+
+
+        Visualize(Vo);
+
+
+        transform.rotation = Quaternion.LookRotation(Vo); //this is for the canon lo face the cursor
+
+        if (Input.GetMouseButtonDown(0)) //the left click is pressed will stop shooting
+        {
+            Rigidbody obj = Instantiate(bulletPrefabs, shootPoint.position, Quaternion.identity);
+            obj.velocity = Vo;
+
+        }
+
+    }
 
 
 
@@ -128,8 +184,8 @@ public class Projectile : MonoBehaviour {
 
 		
 		float sY = (-0.5f * Mathf.Abs(Physics.gravity.y) * Mathf.Pow(time, 2) ) + (vo.y * time) + shootPoint.position.y;
-        float sX = (0.5f * Mathf.Abs(desaceleration) * Mathf.Pow(time, 2)) + (vo.x * time) + shootPoint.position.x;
-        float sZ = (0.5f * Mathf.Abs(desacelerationz) * Mathf.Pow(time, 2)) + (vo.z * time) + shootPoint.position.z;
+        float sX = (0.5f * desaceleration * Mathf.Pow(time, 2)) + (vo.x * time) + shootPoint.position.x;
+        float sZ = (0.5f * desacelerationz * Mathf.Pow(time, 2)) + (vo.z * time) + shootPoint.position.z;
 
         Vector3 result = new Vector3(sX, sY, sZ);
 

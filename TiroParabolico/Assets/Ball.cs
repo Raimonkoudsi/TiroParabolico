@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour {
 
-    public float fuerza;
     public Vector3 direccion;
 
     Rigidbody rb;
@@ -16,6 +15,6 @@ public class Ball : MonoBehaviour {
 	
 	// Update is called once per frame
 	void FixedUpdate () {
-        rb.AddForce(direccion * fuerza);
+        rb.AddForce(direccion);
     }
 }
